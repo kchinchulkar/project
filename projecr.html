@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SentinelOps — GuardianGrid</title>
+<link rel="stylesheet" href="project.css" />
+</head>
+<body>
+
+<!-- ============ TOP NAV (shared across all pages) ============ -->
+<div class="topnav">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-name">SENTINEL<span class="brand-accent">OPS</span></span>
+  </div>
+  <nav class="modules">
+    <button class="module active" data-page="command-center">Command Center</button>
+    <button class="module" data-page="digital-server-room">Digital Server Room</button>
+    <button class="module" data-page="incident-center">Incident Center</button>
+    <button class="module" data-page="ai-diagnosis">AI Diagnosis</button>
+    <button class="module" data-page="healing-center">Healing Center</button>
+    <button class="module" data-page="fault-injection">Fault Injection</button>
+  </nav>
+  <div class="nav-right">
+    <span class="conn-status" id="globalConnStatus"><span class="dot dot-warn"></span> Mock data mode</span>
+    <div class="avatar">GG</div>
+  </div>
+</div>
+
+<!-- ============ PAGE: COMMAND CENTER ============ -->
+<section class="page active" id="page-command-center">
+  <div class="pulse-strip">
+    <div class="pulse-left">
+      <div class="pulse-label">SYSTEM STATUS</div>
+      <div class="pulse-status crit" id="cc-pulseStatus">ATTENTION NEEDED</div>
+    </div>
+    <div class="pulse-wave-wrap"><svg class="pulse-wave" viewBox="0 0 1000 60"><polyline id="cc-pulseLine" points=""/></svg></div>
+    <div class="pulse-right">
+      <div class="pulse-metric"><span class="pulse-metric-value" id="cc-metricUptime">—</span><span class="pulse-metric-label">Uptime</span></div>
+      <div class="pulse-metric"><span class="pulse-metric-value" id="cc-metricAlerts" style="color:var(--status-critical);">—</span><span class="pulse-metric-label">Alerts</span></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Active Alerts</h2><span class="panel-badge" id="cc-alertsCount">0</span></div>
+      <div class="panel-body scroll-body" style="padding:0;">
+        <table class="data-table">
+          <thead><tr><th style="padding-left:18px;">Sensor</th><th>Value</th><th>Status</th><th>Device</th><th style="text-align:right; padding-right:18px;">Updated</th></tr></thead>
+          <tbody id="cc-alertsTableBody"><tr class="skeleton-row"><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Server Room Environment</h2></div>
+      <div class="panel-body gauge-body">
+        <svg class="gauge" viewBox="0 0 200 120">
+          <path d="M 30 100 A 70 70 0 0 1 170 100" fill="none" stroke="var(--border-soft)" stroke-width="14" stroke-linecap="round"/>
+          <path id="cc-gaugeFill" d="M 30 100 A 70 70 0 0 1 170 100" fill="none" stroke="var(--status-normal)" stroke-width="14" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220"/>
+          <line id="cc-gaugeNeedle" x1="100" y1="100" x2="100" y2="40" stroke="var(--text-primary)" stroke-width="3" stroke-linecap="round" style="transform-origin:100px 100px; transition:transform .6s ease;"/>
+          <circle cx="100" cy="100" r="5" fill="var(--text-primary)"/>
+        </svg>
+        <div class="gauge-reading">
+          <span class="gauge-value" id="cc-gaugeValue">—</span>
+          <span class="gauge-caption">Server room temperature</span>
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat"><span class="mini-stat-label">Humidity</span><span class="mini-stat-value" id="cc-statHumidity">—</span></div>
+          <div class="mini-stat"><span class="mini-stat-label">Smoke (MQ-2)</span><span class="mini-stat-value" id="cc-statVoltage">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel span-7">
+      <div class="panel-head">
+        <h2>Device Status</h2>
+        <div class="range-toggle">
+          <button class="range-btn active" data-filter="all" id="cc-filterAll">All</button>
+          <button class="range-btn" data-filter="alert" id="cc-filterAlert">Alerts</button>
+        </div>
+      </div>
+      <div class="panel-body scroll-body" style="padding:0;">
+        <table class="data-table">
+          <thead><tr><th style="padding-left:18px;">IP Address</th><th>Device</th><th style="text-align:right; padding-right:18px;">Status</th></tr></thead>
+          <tbody id="cc-deviceTableBody"><tr class="skeleton-row"><td colspan="3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Lab Temperature Trend</h2></div>
+      <div class="panel-body"><canvas id="cc-trendChart" style="width:100%; height:220px;"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE: DIGITAL SERVER ROOM ============ -->
+<section class="page" id="page-digital-server-room">
+  <div class="grid">
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Digital Server Room — Topology</h2><span style="font-family:var(--font-display); font-size:11px; color:var(--text-faint);">Click a node</span></div>
+      <div class="panel-body">
+        <div class="topology-wrap">
+          <svg class="topo-svg" id="dsr-topoSvg" viewBox="0 0 1000 480" preserveAspectRatio="none"></svg>
+          <div class="topo-grid">
+            <div class="topo-row-1" style="grid-column:1; display:flex;">
+              <div class="node" id="dsr-node-esp32-1" data-node="esp32-1"><div class="node-icon">📡</div><div class="node-name">ESP32-1</div><div class="node-sub">Server Room sensors</div><span class="status-pill normal" id="dsr-pill-esp32-1">Normal</span></div>
+            </div>
+            <div class="topo-row-1" style="grid-column:2; display:flex;">
+              <div class="node" id="dsr-node-server-1" data-node="server-1"><div class="node-icon">🖥️</div><div class="node-name">SERVER 1</div><div class="node-sub">Primary node</div><span class="status-pill normal" id="dsr-pill-server-1">Normal</span></div>
+            </div>
+            <div class="topo-row-1" style="grid-column:3; display:flex;">
+              <div class="node" id="dsr-node-server-2" data-node="server-2"><div class="node-icon">🖥️</div><div class="node-name">SERVER 2</div><div class="node-sub">Failover node</div><span class="status-pill normal" id="dsr-pill-server-2">Normal</span></div>
+            </div>
+            <div class="topo-row-1" style="grid-column:4; display:flex;">
+              <div class="node" id="dsr-node-esp32-2" data-node="esp32-2"><div class="node-icon">📡</div><div class="node-name">ESP32-2</div><div class="node-sub">Lab room sensors</div><span class="status-pill normal" id="dsr-pill-esp32-2">Normal</span></div>
+            </div>
+            <div class="topo-row-2">
+              <div class="node" id="dsr-node-switch" data-node="switch"><div class="node-icon">🔀</div><div class="node-name">NETWORK SWITCH</div><div class="node-sub">Central link</div><span class="status-pill normal" id="dsr-pill-switch">Normal</span></div>
+            </div>
+            <div class="topo-row-3">
+              <div class="node" id="dsr-node-guardian" data-node="guardian"><div class="node-icon">🛡️</div><div class="node-name">GUARDIAN ENGINE</div><div class="node-sub">Policy · Decide · Heal</div><span class="status-pill normal" id="dsr-pill-guardian">Active</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--status-normal)"></span> Normal</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--status-critical)"></span> Alert</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-cyan)"></span> Active link</div>
+      </div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Node Details</h2></div>
+      <div class="panel-body" id="dsr-detailPanel"><div class="empty-detail">Select a node from the topology to see its details.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE: INCIDENT CENTER ============ -->
+<section class="page" id="page-incident-center">
+  <div class="grid">
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Incidents</h2><span class="panel-badge" id="ic-incidentCount">0</span></div>
+      <div class="panel-body" style="padding:0;">
+        <table class="data-table">
+          <thead><tr><th style="padding-left:18px;">ID</th><th>Severity</th><th>Device</th><th>Symptom</th><th>Status</th><th style="text-align:right; padding-right:18px;">Opened</th></tr></thead>
+          <tbody id="ic-tableBody"><tr class="skeleton-row"><td colspan="6">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Incident Detail</h2></div>
+      <div class="panel-body" id="ic-detailPanel"><div class="empty-detail">Select an incident from the list.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE: AI DIAGNOSIS ============ -->
+<section class="page" id="page-ai-diagnosis">
+  <div class="grid">
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Select Incident</h2></div>
+      <div class="incident-picker" id="ai-picker"></div>
+      <div class="panel-body">
+        <h2 style="font-size:12px; color:var(--text-faint); font-family:var(--font-display); letter-spacing:.06em; margin-bottom:10px;">RAW SIGNALS CONSIDERED</h2>
+        <div id="ai-signals"><div class="empty-detail">Select an incident.</div></div>
+      </div>
+    </div>
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Root Cause Ranking</h2><span style="font-family:var(--font-display); font-size:11px; color:var(--text-faint);" id="ai-modelLabel">Model: —</span></div>
+      <div class="panel-body" id="ai-causes"><div class="empty-detail">Select an incident.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE: HEALING CENTER ============ -->
+<section class="page" id="page-healing-center">
+  <div class="grid">
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Healing Actions</h2><span class="panel-badge" id="hc-activeCount" style="background:var(--status-warning-dim); color:var(--status-warning);">0</span></div>
+      <div class="guardian-summary" id="hc-summary"></div>
+      <div class="panel-body" id="hc-list"></div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Guardian Policy Engine</h2></div>
+      <div class="panel-body">
+        <div class="policy-note"><b>How this works:</b> the AI never touches the system directly. It proposes an action; Guardian checks it against safety rules before anything runs.</div>
+        <table class="data-table"><tbody id="hc-policyBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE: FAULT INJECTION ============ -->
+<section class="page" id="page-fault-injection">
+  <div class="grid">
+    <div class="panel span-7">
+      <div class="panel-head"><h2>Trigger Test Fault</h2></div>
+      <div class="panel-body">
+        <div class="warning-banner">⚠️ These trigger simulated faults on the demo system only. No real hardware is damaged.</div>
+        <div id="fi-list"></div>
+      </div>
+    </div>
+    <div class="panel span-5">
+      <div class="panel-head"><h2>Injection Log</h2></div>
+      <div class="panel-body scroll-body" id="fi-log"><div style="color:var(--text-faint); font-style:italic; text-align:center; padding:24px;">No faults injected yet.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="statusbar">
+  <span id="globalApiLabel">API: https://api.example.com/v1</span>
+  <span id="globalLastSync">Last sync: —</span>
+</div>
+
+<div class="confirm-overlay" id="fi-confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Confirm Fault Injection</div>
+    <div class="confirm-body" id="fi-confirmBody">Are you sure?</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" id="fi-cancelBtn">Cancel</button>
+      <button class="confirm-btn proceed" id="fi-proceedBtn">Yes, Inject Fault</button>
+    </div>
+  </div>
+</div>
+
+<script src="project.js"></script>
+</body>
+</html>
